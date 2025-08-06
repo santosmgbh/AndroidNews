@@ -2,4 +2,8 @@
     <string name="app_name">Shortnify</string>
     <string name="enter_your_link">Enter your link</string>
     <string name="send">Send</string>
+    <string name="loading">Loading</string>
+    <string name="sorry_something_went_wrong">Sorry, something went wrong</string>
+    <string name="app_title">Shortnify</string>
+    <string name="no_links_yet_try_adding_one">No links yet, try adding one.</string>
 </resources>

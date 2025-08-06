@@ -24,8 +24,12 @@ class HomeViewModel @Inject constructor(val shortLinkUseCase: ShortLinkUseCase, 
     private val _shortLinkUIState: MutableStateFlow<ShortLinkUIState> = MutableStateFlow(ShortLinkUIState.None)
 
     private val _shortenedLinksAsync = getShortnedLinksUseCase()
-        .map<List<LinkItem>, HomeUIState> { links ->
-            HomeUIState.Success(links)
+        .map { links ->
+            if (links.isNotEmpty()) {
+                HomeUIState.Success(links)
+            } else {
+                HomeUIState.Empty
+            }
         }
         .catch { exception ->
             emit(HomeUIState.Error(exception.message ?: "Unknown error"))
@@ -37,7 +41,7 @@ class HomeViewModel @Inject constructor(val shortLinkUseCase: ShortLinkUseCase, 
             ShortLinkUIState.None -> shortenedLinks
             ShortLinkUIState.Loading -> HomeUIState.Loading
             ShortLinkUIState.Success -> shortenedLinks
-            ShortLinkUIState.Error -> HomeUIState.Error("Error")
+            ShortLinkUIState.Error -> HomeUIState.Error("Unexpected Error")
         }
     }
         .stateIn(
