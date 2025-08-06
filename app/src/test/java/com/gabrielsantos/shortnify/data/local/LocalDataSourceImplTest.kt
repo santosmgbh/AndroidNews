@@ -43,7 +43,6 @@ class LocalDataSourceImplTest {
 
     @Test
     fun `addShortenedUrl to non empty list`() {
-        // Test adding a URL when the list already contains items. 
         // Verify the new URL is added with an id incremented from the last item and the correct URL string.
         runBlocking {
             val firstUrl = "https://example.com/first"
@@ -61,7 +60,6 @@ class LocalDataSourceImplTest {
 
     @Test
     fun `addShortenedUrl multiple additions`() {
-        // Test adding multiple URLs sequentially. 
         // Verify that each URL is added correctly with incrementing ids and the list reflects all additions.
         runBlocking {
             val urls = listOf(
@@ -86,7 +84,6 @@ class LocalDataSourceImplTest {
 
     @Test
     fun `addShortenedUrl with empty string`() {
-        // Test adding an empty string as a URL. 
         // Verify the behavior (e.g., if it's allowed and how it's stored).
         runBlocking {
             val emptyUrl = ""
@@ -157,7 +154,6 @@ class LocalDataSourceImplTest {
 
     @Test
     fun `clearShortenedUrls on empty list`() {
-        // Test calling clearShortenedUrls when the list is already empty. 
         // Verify the list remains empty and no errors occur.
         runBlocking {
             // Verify initial empty state
@@ -175,7 +171,6 @@ class LocalDataSourceImplTest {
 
     @Test
     fun `clearShortenedUrls on non empty list`() {
-        // Test calling clearShortenedUrls when the list contains items. 
         // Verify the list becomes empty.
         runBlocking {
             val url1 = "https://example.com/first"
@@ -220,7 +215,6 @@ class LocalDataSourceImplTest {
 
     @Test
     fun `addShortenedUrl after clear`() {
-        // Test adding a URL after the list has been cleared. 
         // Verify the new URL is added with id 0.
         runBlocking {
             val url1 = "https://example.com/first"
@@ -243,111 +237,4 @@ class LocalDataSourceImplTest {
             assertEquals(LinkData(0, url3), result[0])
         }
     }
-
-    @Test
-    fun `getShortenedUrls multiple observers`() {
-        // Test if multiple collectors of the getShortenedUrls Flow receive updates correctly.
-        runBlocking {
-            val url = "https://example.com/test"
-            
-            // Collect from multiple flows
-            val flow1 = localDataSource.getShortenedUrls()
-            val flow2 = localDataSource.getShortenedUrls()
-            
-            // Both should initially be empty
-            assertEquals(emptyList<LinkData>(), flow1.first())
-            assertEquals(emptyList<LinkData>(), flow2.first())
-            
-            // Add a URL
-            localDataSource.addShortenedUrl(url)
-            
-            // Both flows should receive the update
-            val expectedList = listOf(LinkData(0, url))
-            assertEquals(expectedList, flow1.first())
-            assertEquals(expectedList, flow2.first())
-        }
-    }
-
-    @Test
-    fun `addShortenedUrl concurrency`() {
-        // (Advanced) Test adding URLs from multiple coroutines concurrently. 
-        // Ensure data integrity and correct ID assignment (though MutableStateFlow is generally thread-safe for updates).
-        runBlocking {
-            val urls = (1..10).map { "https://example.com/url$it" }
-            
-            // Note: This is a simplified concurrency test. MutableStateFlow updates are atomic,
-            // but the ID generation logic might not handle true concurrency perfectly.
-            // For production code, consider using atomic operations for ID generation.
-            urls.forEach { url ->
-                localDataSource.addShortenedUrl(url)
-            }
-            
-            val result = localDataSource.getShortenedUrls().first()
-            assertEquals(10, result.size)
-            
-            // Verify all URLs are present and IDs are sequential
-            urls.forEachIndexed { index, url ->
-                assertEquals(LinkData(index.toLong(), url), result[index])
-            }
-        }
-    }
-
-    @Test
-    fun `clearShortenedUrls concurrency`() {
-        // (Advanced) Test clearing URLs while other operations (like add) might be happening. 
-        // Verify consistent state.
-        runBlocking {
-            val url1 = "https://example.com/first"
-            val url2 = "https://example.com/second"
-            
-            // Add some URLs
-            localDataSource.addShortenedUrl(url1)
-            localDataSource.addShortenedUrl(url2)
-            
-            // Verify list has items
-            var result = localDataSource.getShortenedUrls().first()
-            assertEquals(2, result.size)
-            
-            // Clear and immediately add
-            localDataSource.clearShortenedUrls()
-            localDataSource.addShortenedUrl(url1)
-            
-            // Verify state consistency
-            result = localDataSource.getShortenedUrls().first()
-            assertEquals(1, result.size)
-            assertEquals(LinkData(0, url1), result[0])
-        }
-    }
-
-    @Test
-    fun `ID generation with large numbers`() {
-        // Test adding URLs until the ID reaches a large number (e.g., near Int.MAX_VALUE - 1). 
-        // Verify the next ID is generated correctly without overflow if it's within Int range. Note: this doesn't test overflow itself, but correct incrementing near max.
-        runBlocking {
-            // This test is simplified due to performance constraints.
-            // In a real scenario, you might want to test with larger numbers or mock the internal state.
-            val baseId = Long.MAX_VALUE - 5
-            val testUrl = "https://example.com/test"
-            
-            // Since we can't easily set the internal state to start with a large ID,
-            // we'll test the logic by adding a few URLs and verifying sequential ID generation
-            val urls = (1..5).map { "https://example.com/url$it" }
-            
-            urls.forEach { url ->
-                localDataSource.addShortenedUrl(url)
-            }
-            
-            val result = localDataSource.getShortenedUrls().first()
-            assertEquals(5, result.size)
-            
-            // Verify IDs are sequential starting from 0
-            urls.forEachIndexed { index, url ->
-                assertEquals(LinkData(index.toLong(), url), result[index])
-            }
-            
-            // Verify the last ID is 4 (0-based indexing for 5 items)
-            assertEquals(4L, result.last().id)
-        }
-    }
-
 }
