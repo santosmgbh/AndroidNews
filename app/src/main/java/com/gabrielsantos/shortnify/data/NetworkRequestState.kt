@@ -1,7 +1,7 @@
 package com.gabrielsantos.shortnify.data
 
 sealed class NetworkRequestState {
-    object Loading: NetworkRequestState()
-    object Success: NetworkRequestState()
-    object Error: NetworkRequestState()
+    data object Loading: NetworkRequestState()
+    data object Success: NetworkRequestState()
+    data object Error: NetworkRequestState()
 }

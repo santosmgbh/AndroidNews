@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import com.gabrielsantos.shortnify.domain.GetShortnedLinksUseCase
 import com.gabrielsantos.shortnify.domain.ShortLinkUseCase
 import com.gabrielsantos.shortnify.ui.entities.HomeUIState
-import com.gabrielsantos.shortnify.ui.entities.LinkItem
 import com.gabrielsantos.shortnify.ui.entities.ShortLinkUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

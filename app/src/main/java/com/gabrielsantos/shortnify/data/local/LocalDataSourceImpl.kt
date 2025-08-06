@@ -1,6 +1,5 @@
 package com.gabrielsantos.shortnify.data.local
 
-import android.util.Log
 import com.gabrielsantos.shortnify.data.LinkData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

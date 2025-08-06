@@ -1,7 +1,5 @@
 package com.gabrielsantos.shortnify.ui
 
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -40,7 +38,6 @@ import com.gabrielsantos.shortnify.R
 import com.gabrielsantos.shortnify.ui.entities.HomeUIState
 import com.gabrielsantos.shortnify.ui.entities.LinkItem
 import com.gabrielsantos.shortnify.ui.theme.ShortnifyTheme
-import androidx.core.net.toUri
 
 @Composable
 internal fun HomeScreen(viewModel: HomeViewModel) {
