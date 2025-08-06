@@ -4,40 +4,53 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gabrielsantos.shortnify.domain.GetShortnedLinksUseCase
 import com.gabrielsantos.shortnify.domain.ShortLinkUseCase
+import com.gabrielsantos.shortnify.ui.entities.HomeUIState
 import com.gabrielsantos.shortnify.ui.entities.LinkItem
+import com.gabrielsantos.shortnify.ui.entities.ShortLinkUIState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(val shortLinkUseCase: ShortLinkUseCase, getShortnedLinksUseCase: GetShortnedLinksUseCase): ViewModel() {
 
-    private val _uiState: MutableStateFlow<HomeUIState> = MutableStateFlow(HomeUIState.Loading)
-    val uiState = _uiState.asStateFlow()
+    private val _shortLinkUIState: MutableStateFlow<ShortLinkUIState> = MutableStateFlow(ShortLinkUIState.None)
 
-    init {
-        viewModelScope.launch {
-            getShortnedLinksUseCase().
-            catch { exception ->
-                _uiState.value = HomeUIState.Error(exception.message ?: "Unknown error") }
-            .collect {
-                _uiState.value = HomeUIState.Success(it)
-            }
+    private val _shortenedLinksAsync = getShortnedLinksUseCase()
+        .map<List<LinkItem>, HomeUIState> { links ->
+            HomeUIState.Success(links)
+        }
+        .catch { exception ->
+            emit(HomeUIState.Error(exception.message ?: "Unknown error"))
+        }
+
+    val uiState: StateFlow<HomeUIState> = combine(_shortLinkUIState, _shortenedLinksAsync)
+    { shortLinkUIState, shortenedLinks ->
+        when (shortLinkUIState) {
+            ShortLinkUIState.None -> shortenedLinks
+            ShortLinkUIState.Loading -> HomeUIState.Loading
+            ShortLinkUIState.Success -> shortenedLinks
+            ShortLinkUIState.Error -> HomeUIState.Error("Error")
         }
     }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000L),
+            initialValue = HomeUIState.Loading
+        )
 
     fun shortLink(link: String) {
         viewModelScope.launch {
-            shortLinkUseCase(link)
+            shortLinkUseCase(link).collect{
+                _shortLinkUIState.value = it
+            }
         }
     }
-}
-
-sealed class HomeUIState {
-    object Loading: HomeUIState()
-    data class Success(val links: List<LinkItem>): HomeUIState()
-    data class Error(val message: String): HomeUIState()
 }

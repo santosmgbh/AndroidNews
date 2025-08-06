@@ -1,5 +1,6 @@
 package com.gabrielsantos.shortnify.domain
 
+import android.util.Log
 import com.gabrielsantos.shortnify.data.LinkRepository
 import com.gabrielsantos.shortnify.ui.entities.LinkItem
 import kotlinx.coroutines.flow.Flow

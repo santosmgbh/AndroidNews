@@ -1,12 +1,14 @@
 package com.gabrielsantos.shortnify.data.local
 
+import android.util.Log
 import com.gabrielsantos.shortnify.data.LinkData
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class LocalDataSourceImpl @Inject constructor(): LocalDataSource {
 
     private val _shortenedUrls = MutableStateFlow<List<LinkData>>(emptyList())
@@ -15,8 +17,13 @@ class LocalDataSourceImpl @Inject constructor(): LocalDataSource {
         return _shortenedUrls
     }
 
-    override fun addShortenedUrl(shortenedUrl: LinkData) {
-        _shortenedUrls.update { currentList -> currentList + shortenedUrl }
+    override fun addShortenedUrl(shortenedUrl: String) {
+        val linkData: LinkData = if (_shortenedUrls.value.isEmpty()) {
+            LinkData(id = 0, url = shortenedUrl)
+        } else {
+            LinkData(id = _shortenedUrls.value.last().id + 1, url = shortenedUrl)
+        }
+        _shortenedUrls.update { currentList -> currentList + linkData }
     }
 
     override fun clearShortenedUrls() {

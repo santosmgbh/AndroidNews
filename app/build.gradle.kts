@@ -18,6 +18,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "BASE_URL", "\"https://url-shortener-server.onrender.com/\"")
     }
 
     buildTypes {
@@ -38,6 +40,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -69,4 +72,13 @@ dependencies {
     implementation(libs.hilt.work)
     ksp(libs.hilt.dagger.compiler)
     ksp(libs.hilt.compiler)
+
+    // Retrofit
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.retrofit2.kotlin.coroutines.adapter)
+
+    // okHttp
+    implementation(libs.okhttp)
+    implementation(libs.logging.interceptor)
 }

@@ -5,6 +5,6 @@ import kotlinx.coroutines.flow.Flow
 
 interface LocalDataSource {
     fun getShortenedUrls(): Flow<List<LinkData>>
-    fun addShortenedUrl(shortenedUrl: LinkData)
+    fun addShortenedUrl(shortenedUrl: String)
     fun clearShortenedUrls()
 }
