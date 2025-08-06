@@ -1,5 +1,8 @@
 package com.gabrielsantos.shortnify.ui
 
+import android.content.Context
+import android.content.Intent
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gabrielsantos.shortnify.domain.GetShortnedLinksUseCase
@@ -56,5 +59,11 @@ class HomeViewModel @Inject constructor(val shortLinkUseCase: ShortLinkUseCase, 
                 _shortLinkUIState.value = it
             }
         }
+    }
+
+    fun navigateToLink(context: Context, url: String) {
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.data = url.toUri()
+        context.startActivity(intent)
     }
 }

@@ -1,5 +1,8 @@
 package com.gabrielsantos.shortnify.ui
 
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,9 +40,11 @@ import com.gabrielsantos.shortnify.R
 import com.gabrielsantos.shortnify.ui.entities.HomeUIState
 import com.gabrielsantos.shortnify.ui.entities.LinkItem
 import com.gabrielsantos.shortnify.ui.theme.ShortnifyTheme
+import androidx.core.net.toUri
 
 @Composable
 internal fun HomeScreen(viewModel: HomeViewModel) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -76,7 +82,10 @@ internal fun HomeScreen(viewModel: HomeViewModel) {
                         }
                     }
 
-                    is HomeUIState.Success -> LinkList(links = currentState.links)
+                    is HomeUIState.Success -> LinkList(links = currentState.links, onClickItem = { url ->
+                        viewModel.navigateToLink(url)
+                    })
+
                     is HomeUIState.Error -> {
                         Column(
                             modifier = Modifier.fillMaxSize(),
@@ -150,7 +159,7 @@ fun LinkInputField(onSend: (link: String) -> Unit) {
 }
 
 @Composable
-fun LinkList(links: List<LinkItem>, modifier: Modifier = Modifier) {
+fun LinkList(links: List<LinkItem>, onClickItem: (url: String) -> Unit = {}, modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier.fillMaxSize(),
         shape = MaterialTheme.shapes.medium,
@@ -164,16 +173,18 @@ fun LinkList(links: List<LinkItem>, modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(items = links, key = { link -> link.id }) { link ->
-                LinkItemView(link.url)
+                LinkItemView(onClick = { onClickItem(link.url) }, link = link.url)
             }
         }
     }
 }
 
 @Composable
-fun LinkItemView(link: String) {
+fun LinkItemView(link: String, onClick: () -> Unit = {}) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
