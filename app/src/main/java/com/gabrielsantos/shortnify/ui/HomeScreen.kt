@@ -156,7 +156,7 @@ fun LinkInputField(onSend: (link: String) -> Unit) {
 }
 
 @Composable
-fun LinkList(links: List<LinkItem>, onClickItem: (url: String) -> Unit = {}, modifier: Modifier = Modifier) {
+fun LinkList(modifier: Modifier = Modifier, links: List<LinkItem>, onClickItem: (url: String) -> Unit = {}) {
     Surface(
         modifier = modifier.fillMaxSize(),
         shape = MaterialTheme.shapes.medium,
