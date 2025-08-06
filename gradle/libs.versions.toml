@@ -17,6 +17,7 @@ navigationCompose = "2.9.3"
 retrofit = "3.0.0"
 retrofit2KotlinCoroutinesAdapter = "0.9.2"
 okhttp = "5.1.0"
+mockk = "1.13.5"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -52,6 +53,9 @@ retrofit-converter-gson = { module = "com.squareup.retrofit2:converter-gson", ve
 # OKhttp
 logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+
+# Mockk
+mockk-io = { module = "io.mockk:mockk", version.ref = "mockk"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

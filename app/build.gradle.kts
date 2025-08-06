@@ -81,4 +81,8 @@ dependencies {
     // okHttp
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)
+
+    // mockk
+    testImplementation(kotlin("test"))
+    testImplementation(libs.mockk.io)
 }

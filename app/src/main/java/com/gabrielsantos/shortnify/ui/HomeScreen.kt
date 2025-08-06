@@ -83,7 +83,7 @@ internal fun HomeScreen(viewModel: HomeViewModel) {
                     }
 
                     is HomeUIState.Success -> LinkList(links = currentState.links, onClickItem = { url ->
-                        viewModel.navigateToLink(url)
+                        viewModel.navigateToLink(context, url)
                     })
 
                     is HomeUIState.Error -> {
