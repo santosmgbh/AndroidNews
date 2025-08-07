@@ -15,10 +15,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.gabrielsantos.shortnify.ui.entities.LinkItem
+import com.gabrielsantos.shortnify.domain.LinkItem
 
 @Composable
-fun LinkList(modifier: Modifier = Modifier, links: List<LinkItem>) {
+fun LinkList(
+    links: List<LinkItem>,
+    onClickItem: (url: String) -> Unit = {},
+    modifier: Modifier = Modifier
+) {
     Surface(
         modifier = modifier.fillMaxSize(),
         shape = MaterialTheme.shapes.medium,
@@ -32,7 +36,7 @@ fun LinkList(modifier: Modifier = Modifier, links: List<LinkItem>) {
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(items = links, key = { link -> link.id }) { link ->
-                LinkItemView(link = link.url)
+                LinkItemView(onClick = { onClickItem(link.url) }, link = link.url)
             }
         }
     }

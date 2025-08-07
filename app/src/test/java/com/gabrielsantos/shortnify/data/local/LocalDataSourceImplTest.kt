@@ -1,6 +1,6 @@
 package com.gabrielsantos.shortnify.data.local
 
-import com.gabrielsantos.shortnify.data.LinkData
+import com.gabrielsantos.shortnify.domain.LinkItem
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -37,7 +37,7 @@ class LocalDataSourceImplTest {
             
             val result = localDataSource.getShortenedUrls().first()
             assertEquals(1, result.size)
-            assertEquals(LinkData(0, testUrl), result[0])
+            assertEquals(LinkItem(0, testUrl), result[0])
         }
     }
 
@@ -53,8 +53,8 @@ class LocalDataSourceImplTest {
             
             val result = localDataSource.getShortenedUrls().first()
             assertEquals(2, result.size)
-            assertEquals(LinkData(0, firstUrl), result[0])
-            assertEquals(LinkData(1, secondUrl), result[1])
+            assertEquals(LinkItem(0, firstUrl), result[0])
+            assertEquals(LinkItem(1, secondUrl), result[1])
         }
     }
 
@@ -77,7 +77,7 @@ class LocalDataSourceImplTest {
             assertEquals(4, result.size)
             
             urls.forEachIndexed { index, url ->
-                assertEquals(LinkData(index.toLong(), url), result[index])
+                assertEquals(LinkItem(index.toLong(), url), result[index])
             }
         }
     }
@@ -92,7 +92,7 @@ class LocalDataSourceImplTest {
             
             val result = localDataSource.getShortenedUrls().first()
             assertEquals(1, result.size)
-            assertEquals(LinkData(0, emptyUrl), result[0])
+            assertEquals(LinkItem(0, emptyUrl), result[0])
         }
     }
 
@@ -107,7 +107,7 @@ class LocalDataSourceImplTest {
             
             val result = localDataSource.getShortenedUrls().first()
             assertEquals(1, result.size)
-            assertEquals(LinkData(0, longUrl), result[0])
+            assertEquals(LinkItem(0, longUrl), result[0])
         }
     }
 
@@ -122,7 +122,7 @@ class LocalDataSourceImplTest {
             
             val result = localDataSource.getShortenedUrls().first()
             assertEquals(1, result.size)
-            assertEquals(LinkData(0, specialUrl), result[0])
+            assertEquals(LinkItem(0, specialUrl), result[0])
         }
     }
 
@@ -141,14 +141,14 @@ class LocalDataSourceImplTest {
             localDataSource.addShortenedUrl(url1)
             result = localDataSource.getShortenedUrls().first()
             assertEquals(1, result.size)
-            assertEquals(LinkData(0, url1), result[0])
+            assertEquals(LinkItem(0, url1), result[0])
             
             // Add second URL
             localDataSource.addShortenedUrl(url2)
             result = localDataSource.getShortenedUrls().first()
             assertEquals(2, result.size)
-            assertEquals(LinkData(0, url1), result[0])
-            assertEquals(LinkData(1, url2), result[1])
+            assertEquals(LinkItem(0, url1), result[0])
+            assertEquals(LinkItem(1, url2), result[1])
         }
     }
 
@@ -234,7 +234,7 @@ class LocalDataSourceImplTest {
             // Verify the new URL starts with id 0
             val result = localDataSource.getShortenedUrls().first()
             assertEquals(1, result.size)
-            assertEquals(LinkData(0, url3), result[0])
+            assertEquals(LinkItem(0, url3), result[0])
         }
     }
 }

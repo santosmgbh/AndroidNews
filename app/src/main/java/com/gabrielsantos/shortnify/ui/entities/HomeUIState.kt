@@ -1,5 +1,7 @@
 package com.gabrielsantos.shortnify.ui.entities
 
+import com.gabrielsantos.shortnify.domain.LinkItem
+
 sealed class HomeUIState {
     data object Empty: HomeUIState()
     data object Loading: HomeUIState()

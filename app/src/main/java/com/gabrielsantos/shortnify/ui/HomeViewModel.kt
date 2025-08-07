@@ -2,58 +2,81 @@ package com.gabrielsantos.shortnify.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.gabrielsantos.shortnify.domain.GetShortnedLinksUseCase
-import com.gabrielsantos.shortnify.domain.ShortLinkUseCase
-import com.gabrielsantos.shortnify.ui.entities.HomeUIState
-import com.gabrielsantos.shortnify.ui.entities.ShortLinkUIState
+import com.gabrielsantos.shortnify.domain.LinkItem
+import com.gabrielsantos.shortnify.domain.LinkRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class HomeViewModel @Inject constructor(val shortLinkUseCase: ShortLinkUseCase, getShortnedLinksUseCase: GetShortnedLinksUseCase): ViewModel() {
+class HomeViewModel @Inject constructor(
+    val linkRepository: LinkRepository
+) : ViewModel() {
 
-    private val _shortLinkUIState: MutableStateFlow<ShortLinkUIState> = MutableStateFlow(ShortLinkUIState.None)
-
-    private val _shortenedLinksAsync = getShortnedLinksUseCase()
+    val uiState: StateFlow<HomeUIState> = linkRepository.getShortnedLinks()
         .map { links ->
-            if (links.isNotEmpty()) {
-                HomeUIState.Success(links)
-            } else {
-                HomeUIState.Empty
-            }
+            if (links.isNotEmpty()) HomeUIState.Success(links) else HomeUIState.Empty
         }
         .catch { exception ->
-            emit(HomeUIState.Error(exception.message ?: "Unknown error"))
+            emit(HomeUIState.Error(exception.message ?: "Erro ao carregar links"))
         }
-
-    val uiState: StateFlow<HomeUIState> = combine(_shortLinkUIState, _shortenedLinksAsync)
-    { shortLinkUIState, shortenedLinks ->
-        when (shortLinkUIState) {
-            ShortLinkUIState.None -> shortenedLinks
-            ShortLinkUIState.Loading -> HomeUIState.Loading
-            ShortLinkUIState.Success -> shortenedLinks
-            ShortLinkUIState.Error -> HomeUIState.Error("Unexpected Error")
-        }
-    }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
             initialValue = HomeUIState.Loading
         )
 
-    fun shortLink(link: String) {
-        viewModelScope.launch {
-            shortLinkUseCase(link).collect{
-                _shortLinkUIState.value = it
-            }
+    private val _event = Channel<HomeUIEvent>()
+    val event = _event.receiveAsFlow()
+
+    fun onIntent(intent: HomeUIIntent) {
+        when (intent) {
+            is HomeUIIntent.OnShortLink -> shortLink(intent.link)
+            is HomeUIIntent.OnNavigateToLink -> navigateToLink(intent.url)
         }
     }
+
+    private fun shortLink(link: String) {
+        viewModelScope.launch {
+            _event.send(HomeUIEvent.OnShortLinkLoading)
+            linkRepository.shortLink(link)
+                .onSuccess {
+                    _event.send(HomeUIEvent.OnShortLinkSuccess)
+                }
+                .onFailure {
+                    _event.send(HomeUIEvent.OnShortLinkFailed)
+                }
+        }
+    }
+
+    private fun navigateToLink(url: String) {
+        viewModelScope.launch {
+            _event.send(HomeUIEvent.OnNavigateToLink(url))
+        }
+    }
+}
+
+sealed class HomeUIState {
+    data object Empty : HomeUIState()
+    data object Loading : HomeUIState()
+    data class Success(val links: List<LinkItem>) : HomeUIState()
+    data class Error(val message: String) : HomeUIState()
+}
+
+sealed class HomeUIIntent() {
+    data class OnShortLink(val link: String) : HomeUIIntent()
+    data class OnNavigateToLink(val url: String) : HomeUIIntent()
+}
+sealed class HomeUIEvent() {
+    data object OnShortLinkLoading : HomeUIEvent()
+    data object OnShortLinkSuccess : HomeUIEvent()
+    data object OnShortLinkFailed : HomeUIEvent()
+    data class OnNavigateToLink(val url: String) : HomeUIEvent()
 }

@@ -1,6 +1,6 @@
 package com.gabrielsantos.shortnify.di
 
-import com.gabrielsantos.shortnify.data.LinkRepository
+import com.gabrielsantos.shortnify.domain.LinkRepository
 import com.gabrielsantos.shortnify.data.LinkRepositoryImpl
 import com.gabrielsantos.shortnify.data.local.LocalDataSource
 import com.gabrielsantos.shortnify.data.local.LocalDataSourceImpl

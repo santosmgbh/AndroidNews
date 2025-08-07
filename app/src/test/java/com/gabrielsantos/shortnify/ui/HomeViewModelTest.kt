@@ -1,10 +1,9 @@
 package com.gabrielsantos.shortnify.ui
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.gabrielsantos.shortnify.domain.GetShortnedLinksUseCase
 import com.gabrielsantos.shortnify.domain.ShortLinkUseCase
 import com.gabrielsantos.shortnify.ui.entities.HomeUIState
-import com.gabrielsantos.shortnify.ui.entities.LinkItem
+import com.gabrielsantos.shortnify.domain.LinkItem
 import com.gabrielsantos.shortnify.ui.entities.ShortLinkUIState
 import io.mockk.coEvery
 import io.mockk.every

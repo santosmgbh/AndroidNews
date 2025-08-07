@@ -74,7 +74,7 @@ class LinkRepositoryImplTest {
     @Test
     fun `getShortnedLinks callsLocalDataSource`() {
         // Verify that getShortnedLinks directly calls and returns the Flow from localDataSource.getShortenedUrls.
-        val expectedLinks = listOf(LinkData(1, "https://sh1.co"))
+        val expectedLinks = listOf(LinkItem(1, "https://sh1.co"))
         coEvery { localDataSource.getShortenedUrls() } returns flowOf(expectedLinks)
 
         runBlocking {
@@ -87,7 +87,7 @@ class LinkRepositoryImplTest {
     @Test
     fun `getShortnedLinks emptyList emitsEmptyFlow`() {
         // Verify that if localDataSource.getShortenedUrls returns a Flow of an empty list, getShortnedLinks also emits a Flow of an empty list.
-        val emptyList = emptyList<LinkData>()
+        val emptyList = emptyList<LinkItem>()
         coEvery { localDataSource.getShortenedUrls() } returns flowOf(emptyList)
 
         runBlocking {
@@ -98,10 +98,10 @@ class LinkRepositoryImplTest {
 
     @Test
     fun `getShortnedLinks populatedList emitsPopulatedFlow`() {
-        // Verify that if localDataSource.getShortenedUrls returns a Flow of a non-empty list of LinkData, getShortnedLinks emits the same Flow.
+        // Verify that if localDataSource.getShortenedUrls returns a Flow of a non-empty list of LinkItem, getShortnedLinks emits the same Flow.
         val populatedList = listOf(
-            LinkData(1, "https://short.ly/ex1"),
-            LinkData(2, "https://short.ly/ex2")
+            LinkItem(1, "https://short.ly/ex1"),
+            LinkItem(2, "https://short.ly/ex2")
         )
         coEvery { localDataSource.getShortenedUrls() } returns flowOf(populatedList)
 

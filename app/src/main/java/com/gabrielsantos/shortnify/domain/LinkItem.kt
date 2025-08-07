@@ -1,3 +1,3 @@
-package com.gabrielsantos.shortnify.ui.entities
+package com.gabrielsantos.shortnify.domain
 
 data class LinkItem(val id: Long, val url: String)
