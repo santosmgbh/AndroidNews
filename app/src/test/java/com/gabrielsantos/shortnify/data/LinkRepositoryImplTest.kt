@@ -6,10 +6,11 @@ import com.gabrielsantos.shortnify.data.network.LinkRequest
 import com.gabrielsantos.shortnify.data.network.LinkResponse
 import com.gabrielsantos.shortnify.data.network.Links
 import com.gabrielsantos.shortnify.domain.LinkItem
-import io.mockk.called
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -18,7 +19,6 @@ import org.junit.Before
 import org.junit.Test
 
 class LinkRepositoryImplTest {
-
     private lateinit var linkAPI: LinkAPI
     private lateinit var localDataSource: LocalDataSource
     private lateinit var linkRepository: LinkRepositoryImpl
@@ -34,8 +34,11 @@ class LinkRepositoryImplTest {
     fun `shortLink returns success`() = runBlocking {
         // Given
         val originalLink = "https://example.com"
-        val shortenedLink = "https://short.ly/abc"
-        val shortUrlResponse = LinkResponse(alias = "123", links = Links(self = "www.selfLink.com", short = "www.shortlink.com"))
+        val shortenedLink = "www.shortlink.com"
+        val shortUrlResponse = LinkResponse(
+            alias = "123",
+            links = Links(self = "www.selfLink.com", short = "www.shortlink.com")
+        )
 
         coEvery { linkAPI.shortLink(LinkRequest(originalLink)) } returns shortUrlResponse
         coEvery { localDataSource.addShortenedUrl(shortenedLink) } returns Unit
@@ -54,13 +57,14 @@ class LinkRepositoryImplTest {
         val originalLink = "https://example.com"
         val exception = Exception("Network error")
         coEvery { linkAPI.shortLink(LinkRequest(originalLink)) } throws exception
+        coEvery { localDataSource.addShortenedUrl(any()) } just runs
 
         // When
         val result = linkRepository.shortLink(originalLink)
 
         // Then
         assertTrue(result.isFailure)
-        coVerify { localDataSource.addShortenedUrl(any()) wasNot called }
+        coVerify(exactly = 0) { localDataSource.addShortenedUrl(any()) }
     }
 
     @Test
