@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gabrielsantos.shortnify.domain.LinkItem
 import com.gabrielsantos.shortnify.domain.LinkRepository
-import com.gabrielsantos.shortnify.domain.ShortLink
+import com.gabrielsantos.shortnify.domain.ShortLinkUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
@@ -18,8 +18,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val shortLinkUseCase: ShortLink,
-    val linkRepository: LinkRepository
+    private val shortLinkUseCase: ShortLinkUseCase,
+    linkRepository: LinkRepository
 ) : ViewModel() {
 
     val uiState: StateFlow<HomeUIState> = linkRepository.getShortnedLinks()
@@ -51,9 +51,9 @@ class HomeViewModel @Inject constructor(
             val result = shortLinkUseCase(link)
             result.onSuccess {
                 val event = when (it) {
-                    ShortLink.ShortLinkResultState.InvalidLinkError -> HomeUIEvent.OnShortLinkInvalidLink
-                    ShortLink.ShortLinkResultState.NetworkError -> HomeUIEvent.OnShortLinkNetworkError
-                    ShortLink.ShortLinkResultState.Success -> HomeUIEvent.OnShortLinkSuccess
+                    ShortLinkUseCase.ShortLinkResultState.InvalidLinkError -> HomeUIEvent.OnShortLinkInvalidLink
+                    ShortLinkUseCase.ShortLinkResultState.NetworkError -> HomeUIEvent.OnShortLinkNetworkError
+                    ShortLinkUseCase.ShortLinkResultState.Success -> HomeUIEvent.OnShortLinkSuccess
                 }
                 _event.send(event)
             }.onFailure {

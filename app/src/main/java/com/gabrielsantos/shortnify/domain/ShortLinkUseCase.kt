@@ -1,13 +1,14 @@
 package com.gabrielsantos.shortnify.domain
 
-import android.util.Patterns
 import javax.inject.Inject
 
-class ShortLink @Inject constructor(private val linkRepository: LinkRepository) {
+class ShortLinkUseCase @Inject constructor(private val linkRepository: LinkRepository) {
 
     suspend operator fun invoke(link: String): Result<ShortLinkResultState> {
-        if (!Patterns.WEB_URL.matcher(link).matches())
+
+        if (link.isEmpty() || !link.startsWith("http://") && !link.startsWith("https://")) {
             return Result.success(ShortLinkResultState.InvalidLinkError)
+        }
         val result = linkRepository.shortLink(link = link).map {
             ShortLinkResultState.Success
         }
