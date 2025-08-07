@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -36,19 +37,26 @@ import com.gabrielsantos.shortnify.ui.theme.ShortnifyTheme
 internal fun HomeScreen(viewModel: HomeViewModel) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
-    val snackBarHostState = rememberSaveable { SnackbarHostState() }
+    val snackBarHostState = remember { SnackbarHostState() }
     var isSending by rememberSaveable { mutableStateOf(false) }
+    var inputText by rememberSaveable { mutableStateOf("") }
 
     CollectAsEvent(viewModel.event) { event ->
         when (event) {
             HomeUIEvent.OnShortLinkSuccess -> {
-                snackBarHostState.showSnackbar("Link shorted successfully!")
                 isSending = false
+                inputText = ""
+                snackBarHostState.showSnackbar("Link shorted successfully!")
             }
 
-            is HomeUIEvent.OnShortLinkFailed -> {
-                snackBarHostState.showSnackbar("Something went wrong")
+            is HomeUIEvent.OnShortLinkNetworkError -> {
                 isSending = false
+                snackBarHostState.showSnackbar("Something went wrong. Please try again later!")
+            }
+
+            HomeUIEvent.OnShortLinkInvalidLink -> {
+                isSending = false
+                snackBarHostState.showSnackbar("The link provided is invalid!")
             }
 
             is HomeUIEvent.OnNavigateToLink -> {
@@ -60,6 +68,7 @@ internal fun HomeScreen(viewModel: HomeViewModel) {
             HomeUIEvent.OnShortLinkLoading -> {
                 isSending = true
             }
+
         }
     }
 
@@ -84,6 +93,7 @@ internal fun HomeScreen(viewModel: HomeViewModel) {
             )
 
             LinkInputField(
+                inputText = inputText,
                 isLoading = isSending,
                 onSend = { link -> viewModel.onIntent(HomeUIIntent.OnShortLink(link)) }
             )

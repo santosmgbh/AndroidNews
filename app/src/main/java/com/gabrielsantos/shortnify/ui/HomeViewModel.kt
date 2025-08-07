@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.gabrielsantos.shortnify.domain.LinkItem
 import com.gabrielsantos.shortnify.domain.LinkRepository
+import com.gabrielsantos.shortnify.domain.ShortLink
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
@@ -17,6 +18,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    private val shortLinkUseCase: ShortLink,
     val linkRepository: LinkRepository
 ) : ViewModel() {
 
@@ -25,7 +27,7 @@ class HomeViewModel @Inject constructor(
             if (links.isNotEmpty()) HomeUIState.Success(links) else HomeUIState.Empty
         }
         .catch { exception ->
-            emit(HomeUIState.Error(exception.message ?: "Erro ao carregar links"))
+            emit(HomeUIState.Error(exception.message))
         }
         .stateIn(
             scope = viewModelScope,
@@ -46,13 +48,17 @@ class HomeViewModel @Inject constructor(
     private fun shortLink(link: String) {
         viewModelScope.launch {
             _event.send(HomeUIEvent.OnShortLinkLoading)
-            linkRepository.shortLink(link)
-                .onSuccess {
-                    _event.send(HomeUIEvent.OnShortLinkSuccess)
+            val result = shortLinkUseCase(link)
+            result.onSuccess {
+                val event = when (it) {
+                    ShortLink.ShortLinkResultState.InvalidLinkError -> HomeUIEvent.OnShortLinkInvalidLink
+                    ShortLink.ShortLinkResultState.NetworkError -> HomeUIEvent.OnShortLinkNetworkError
+                    ShortLink.ShortLinkResultState.Success -> HomeUIEvent.OnShortLinkSuccess
                 }
-                .onFailure {
-                    _event.send(HomeUIEvent.OnShortLinkFailed)
-                }
+                _event.send(event)
+            }.onFailure {
+                _event.send(HomeUIEvent.OnShortLinkNetworkError)
+            }
         }
     }
 
@@ -67,7 +73,7 @@ sealed class HomeUIState {
     data object Empty : HomeUIState()
     data object Loading : HomeUIState()
     data class Success(val links: List<LinkItem>) : HomeUIState()
-    data class Error(val message: String) : HomeUIState()
+    data class Error(val message: String?) : HomeUIState()
 }
 
 sealed class HomeUIIntent() {
@@ -77,6 +83,7 @@ sealed class HomeUIIntent() {
 sealed class HomeUIEvent() {
     data object OnShortLinkLoading : HomeUIEvent()
     data object OnShortLinkSuccess : HomeUIEvent()
-    data object OnShortLinkFailed : HomeUIEvent()
+    data object OnShortLinkNetworkError : HomeUIEvent()
+    data object OnShortLinkInvalidLink : HomeUIEvent()
     data class OnNavigateToLink(val url: String) : HomeUIEvent()
 }

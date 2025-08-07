@@ -22,7 +22,6 @@ class LinkRepositoryImpl @Inject constructor(
             localDataSource.addShortenedUrl(shortedLinkResponse.links.short)
             Result.success(Unit)
         } catch (e: Exception) {
-            Log.e("Error", e.message.toString())
             Result.failure(e)
         }
 
